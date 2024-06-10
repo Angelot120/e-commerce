@@ -37,7 +37,14 @@ class ProductController extends Controller
         $product->price = $request->price; 
         $product->description = $request->description; 
         $product->category_id = $request->category_id; 
-        $product->file = ""; 
+        
+        if ($request->hasFile("file")) {
+            move_uploaded_file($_FILES['file']['tmp_name'], 'db/products/' . $_FILES['file']['name']);
+            $product->file = $_FILES['file']['name'];
+        } else {
+            $product->file = '';
+        }
+
         $product->save();
         return redirect()->route("product.list");
         // return view("products.list")->with('success', 'Produit ajouter avec succes.');
@@ -58,9 +65,10 @@ class ProductController extends Controller
     public function edit(string $id)
     {
         //
-        $products = Product::find($id);
+        $product = Product::find($id);
         // $categories = Category::all()->Product::find($id);
-        return view("products.edit", ["product" => $products]);
+        $categories = Category::all();
+        return view("products.edit", ["product" => $product, "categories" => $categories]);
     }
 
     /**
